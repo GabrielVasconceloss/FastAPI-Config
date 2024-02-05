@@ -3,11 +3,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 from sqlalchemy.orm import sessionmaker
 
-POSTGRES_USER = "fast"
-POSTGRES_PASSWORD = "25673275"
-POSTGRES_DB = "fastapi"
-POSTGRES_HOST = "localhost"
-POSTGRES_PORT = "5433"
+POSTGRES_USER = os.environ.get("POSTGRES_USER", "fast")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "25673275")
+POSTGRES_DB = os.environ.get("POSTGRES_DB", "fastapi")
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "fastapi-config-db-1")
+POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "5432")
+
 
 DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
@@ -20,7 +21,7 @@ from app.db.models import cliente, configuracao_cliente, aprovadores_cliente, ti
 # Função para criar tabelas
 def create_tables():
     Base.metadata.create_all(bind=engine)
-    print('Criouuu')
+    print('Tabelas criadas com sucesso!')
 
 # Se a execução do script é feita diretamente, então chame a função
 if __name__ == "__main__":

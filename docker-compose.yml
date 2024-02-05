@@ -1,0 +1,22 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fast}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-25673275}
+      POSTGRES_DB: ${POSTGRES_DB:-fastapi}
+      POSTGRES_HOST: ${POSTGRES_HOST:-fastapi-config-db-1}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fast}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-25673275}
+      POSTGRES_DB: ${POSTGRES_DB:-fastapi}
+      POSTGRES_HOST: ${POSTGRES_HOST:-fastapi-config-db-1}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}

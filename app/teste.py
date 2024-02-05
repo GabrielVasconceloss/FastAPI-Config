@@ -5,7 +5,7 @@ POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "784512"
 POSTGRES_DB = "mydatabase"
 POSTGRES_HOST = "localhost"
-POSTGRES_PORT = "5433"
+POSTGRES_PORT = "5432"
 
 # Tente conectar ao banco de dados
 try:
