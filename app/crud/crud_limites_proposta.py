@@ -15,8 +15,8 @@ def get_all_limites_proposta(db: Session, id_cliente: int):
         return None
     return limites_proposta
 
-def create_limites_proposta(db: Session, limites_proposta: LimitesPropostaCreate, id_cliente: int, id_proposta: int):
-    db_aprovadores_cliente = LimitesProposta(id_cliente=id_cliente, id_proposta=id_proposta,**limites_proposta.dict())
+def create_limites_proposta(db: Session, limites_proposta: LimitesPropostaCreate):
+    db_aprovadores_cliente = LimitesProposta(**limites_proposta.dict())
     db.add(db_aprovadores_cliente)
     db.commit()
     db.refresh(db_aprovadores_cliente)
@@ -42,7 +42,7 @@ def delete_limites_proposta(db: Session, aprovadores_cliente: LimitesProposta):
 
 
 def get_all_limites_proposta_id_contraparte(db: Session, id_cliente: int, id_contraparte_list: int):
-    limites_proposta = db.query(LimitesProposta).filter(LimitesProposta.id_cliente == id_cliente, LimitesProposta.id_proposta == id_contraparte_list).all()
+    limites_proposta = db.query(LimitesProposta).filter(LimitesProposta.id_cliente == id_cliente, LimitesProposta.id_contraparte == id_contraparte_list, LimitesProposta.active == True).all()
     if not limites_proposta:
         return []
     return limites_proposta

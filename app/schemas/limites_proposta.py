@@ -14,6 +14,8 @@ class LimitesPropostaBase(BaseModel):
     data_criacao: datetime = datetime.now()
 
 class LimitesPropostaCreate(BaseModel):
+    id_proposta: int
+    id_cliente: int
     id_contraparte: int
     tipo_limite: int
     rating: int

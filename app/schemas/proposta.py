@@ -38,10 +38,11 @@ class PropostaResponseBase(BaseModel):
     tipo_analise: int
     status: int
     valor_utilizado_conversao: float
-    LimitesProposta: List
-    observacoes_proposta: List
     active: bool = True
     data_criacao: datetime = datetime.now()
+    LimitesProposta: List
+    observacoes_proposta: List
+
 
 
 

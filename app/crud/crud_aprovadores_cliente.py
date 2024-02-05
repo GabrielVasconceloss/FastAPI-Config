@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.db.models.aprovadores_cliente import AprovadoresCliente
 from app.crud.crud_configuracao_cliente import get_configuracao_cliente
 from app.schemas.aprovadores_cliente import AprovadoresClienteCreate
-
+from sqlalchemy import asc
 
 def create_aprovadores_cliente(db: Session, aprovadores_cliente: AprovadoresClienteCreate):
     db_aprovadores_cliente = AprovadoresCliente(**aprovadores_cliente.dict())
@@ -13,7 +13,12 @@ def create_aprovadores_cliente(db: Session, aprovadores_cliente: AprovadoresClie
 
 
 def get_all_aprovadores_cliente(db: Session, id_cliente: int):
-    aprovadores_cliente = db.query(AprovadoresCliente).filter(AprovadoresCliente.id_cliente == id_cliente, AprovadoresCliente.active == True).all()
+    aprovadores_cliente = (
+        db.query(AprovadoresCliente)
+        .filter(AprovadoresCliente.id_cliente == id_cliente, AprovadoresCliente.active == True)
+        .order_by(asc(AprovadoresCliente.cargo_aprovador))  # Adiciona essa linha para ordenar
+        .all()
+    )
     if not aprovadores_cliente:
         return None
     return aprovadores_cliente

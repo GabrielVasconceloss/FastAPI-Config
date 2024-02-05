@@ -18,17 +18,23 @@ def get_all_propostas_contraparte(db: Session, id_cliente: int):
     return propostas_contraparte
 
 def get_all_propostas_contraparte_filter(db: Session, id_cliente: int, id_contraparte: int):
-    propostas_contraparte = db.query(PropostaContraparte).filter(PropostaContraparte.id_cliente == id_cliente, PropostaContraparte.id_contraparte == id_contraparte).all()
+    propostas_contraparte = db.query(PropostaContraparte).filter(PropostaContraparte.id_cliente == id_cliente, PropostaContraparte.id_contraparte == id_contraparte, PropostaContraparte.active == True).all()
     if not propostas_contraparte:
         return None
     return propostas_contraparte
 
-def create_propostas_contraparte(db: Session, propostas_contraparte: PropostaContraparteCreate, id_cliente: int, id_contraparte: int):
-    db_propostas_contraparte = PropostaContraparte(id_cliente=id_cliente, id_contraparte=id_contraparte, **propostas_contraparte.dict())
+def create_propostas_contraparte(db: Session, propostas_contraparte: PropostaContraparteCreate):
+    db_propostas_contraparte = PropostaContraparte(**propostas_contraparte.dict())
     db.add(db_propostas_contraparte)
     db.commit()
     db.refresh(db_propostas_contraparte)
     return db_propostas_contraparte
+
+def create_propostas_contraparte_status(db: Session, propostas_contraparte: PropostaContraparteCreate):
+    db.add(propostas_contraparte)
+    db.commit()
+    db.refresh(propostas_contraparte)
+    return propostas_contraparte
 
 
 

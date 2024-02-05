@@ -26,25 +26,21 @@ def create_observacoes_proposta(
         *,
         db: Session = Depends(deps.get_db),
         observacoes_proposta_in: ObservacoesPropostaCreate,
-        id_cliente: int,
-        id_proposta: int,
 ) -> Any:
     """
     Create ObservacoesProposta.
     """
-    cliente = crud_cliente.get_cliente(db, id_cliente)
+    cliente = crud_cliente.get_cliente(db, observacoes_proposta_in.id_cliente)
     if cliente is None:
         raise HTTPException(status_code=404, detail="Cliente not found")
 
-    propostas_contraparte = crud_propostas_contraparte.get_unic_propostas_contraparte(db, id_proposta)
+    propostas_contraparte = crud_propostas_contraparte.get_unic_propostas_contraparte(db, observacoes_proposta_in.id_proposta)
     if propostas_contraparte is None:
         raise HTTPException(status_code=404, detail="PropostaContraparte not found")
 
     created_observacoes_proposta = crud_observacoes_proposta.create_observacoes_proposta(
         db=db,
         observacoes_proposta_in=observacoes_proposta_in,
-        id_cliente=id_cliente,
-        id_proposta=id_proposta,
     )
     return created_observacoes_proposta
 
@@ -67,39 +63,69 @@ def read_observacoes_proposta(
         raise HTTPException(status_code=404, detail="ObservacoesProposta not found")
     return observacoes_proposta
 
-
-@router.put("/{id_observacoes}", response_model=ObservacoesProposta)
-def update_observacoes_proposta(
+@router.post("/{id_observacoes}", response_model=ObservacoesProposta)
+def create_observacoes_proposta(
         id_observacoes: int,
         *,
         db: Session = Depends(deps.get_db),
-        params: ObservacoesPropostaUpdate,
+        observacoes_proposta_in: ObservacoesPropostaCreate,
 ) -> Any:
     """
-    Update ObservacoesProposta by id_observacoes.
+    Create ObservacoesProposta.
     """
-    params_dict = dict(params)
+    cliente = crud_cliente.get_cliente(db, observacoes_proposta_in.id_cliente)
+    if cliente is None:
+        raise HTTPException(status_code=404, detail="Cliente not found")
+
+    propostas_contraparte = crud_propostas_contraparte.get_unic_propostas_contraparte(db, observacoes_proposta_in.id_proposta)
+    if propostas_contraparte is None:
+        raise HTTPException(status_code=404, detail="PropostaContraparte not found")
+    
     observacoes_proposta_in_db = crud_observacoes_proposta.get_unic_observacoes_proposta(db, id_observacoes)
-    if observacoes_proposta_in_db is None:
-        raise HTTPException(status_code=404, detail="ObservacoesProposta  not found")
+    if observacoes_proposta_in_db:
+        observacoes_proposta_in_db.active = False
+        db.commit()
+        db.refresh(observacoes_proposta_in_db)
 
-    observacoes_proposta_db_updated = crud_observacoes_proposta.update_observacoes_proposta(
-        db, db_obj=observacoes_proposta_in_db, obj_in=params_dict)
-    return observacoes_proposta_db_updated
+    created_observacoes_proposta = crud_observacoes_proposta.create_observacoes_proposta(
+        db=db,
+        observacoes_proposta_in=observacoes_proposta_in,
+    )
+    return created_observacoes_proposta
 
 
-@router.delete("/{id_observacoes}", response_model=dict)
-def delete_observacoes_proposta(
-        id_observacoes: int,
-        db: Session = Depends(deps.get_db),
-) -> Any:
-    """
-    Delete ObservacoesProposta by ObservacoesProposta.
-    """
-    observacoes_proposta = crud_observacoes_proposta.get_observacoes_proposta(db, id_observacoes)
-    if observacoes_proposta is None:
-        raise HTTPException(status_code=404, detail="ObservacoesProposta not found")
+# @router.put("/{id_observacoes}", response_model=ObservacoesProposta)
+# def update_observacoes_proposta(
+#         id_observacoes: int,
+#         *,
+#         db: Session = Depends(deps.get_db),
+#         params: ObservacoesPropostaUpdate,
+# ) -> Any:
+#     """
+#     Update ObservacoesProposta by id_observacoes.
+#     """
+#     params_dict = dict(params)
+#     observacoes_proposta_in_db = crud_observacoes_proposta.get_unic_observacoes_proposta(db, id_observacoes)
+#     if observacoes_proposta_in_db is None:
+#         raise HTTPException(status_code=404, detail="ObservacoesProposta  not found")
 
-    crud_observacoes_proposta.delete_observacoes_proposta(db, observacoes_proposta)
+#     observacoes_proposta_db_updated = crud_observacoes_proposta.update_observacoes_proposta(
+#         db, db_obj=observacoes_proposta_in_db, obj_in=params_dict)
+#     return observacoes_proposta_db_updated
 
-    return {"message": "ObservacoesProposta deleted successfully"}
+
+# @router.delete("/{id_observacoes}", response_model=dict)
+# def delete_observacoes_proposta(
+#         id_observacoes: int,
+#         db: Session = Depends(deps.get_db),
+# ) -> Any:
+#     """
+#     Delete ObservacoesProposta by ObservacoesProposta.
+#     """
+#     observacoes_proposta = crud_observacoes_proposta.get_observacoes_proposta(db, id_observacoes)
+#     if observacoes_proposta is None:
+#         raise HTTPException(status_code=404, detail="ObservacoesProposta not found")
+
+#     crud_observacoes_proposta.delete_observacoes_proposta(db, observacoes_proposta)
+
+#     return {"message": "ObservacoesProposta deleted successfully"}

@@ -16,6 +16,8 @@ class PropostaContraparteBase(BaseModel):
     
 
 class PropostaContraparteCreate(BaseModel):
+    id_cliente: int
+    id_contraparte: int
     data_aprovacao_limite: datetime
     grupo: str
     tipo_limite: int

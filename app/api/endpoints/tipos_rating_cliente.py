@@ -4,6 +4,7 @@ from app.api import deps
 from app.crud import crud_tipos_rating_cliente, crud_configuracao_cliente, crud_cliente
 from app.schemas.tipos_rating_cliente import TiposRatingCliente, TiposRatingClienteCreate, TiposRatingClienteUpdate
 from typing import List, Any
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
@@ -35,7 +36,8 @@ def read_tipos_rating_cliente(
     tipos_rating_cliente = crud_tipos_rating_cliente.get_all_tipos_rating_cliente(db, id_cliente)
     if tipos_rating_cliente is None:
         raise HTTPException(status_code=404, detail="TiposRatingCliente not found")
-    return tipos_rating_cliente
+    tipos_rating_cliente_dict = jsonable_encoder(tipos_rating_cliente)
+    return tipos_rating_cliente_dict
 
 
 @router.post("/", response_model=TiposRatingCliente)

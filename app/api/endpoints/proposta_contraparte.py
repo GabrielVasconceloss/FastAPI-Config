@@ -5,6 +5,7 @@ from app.crud import crud_propostas_contraparte, crud_configuracao_cliente, crud
 from app.schemas.proposta_contraparte import PropostaContraparteCreate, PropostaContraparte, PropostaContraparteUpdate, PropostaContraparteUpdateStatus
 from app.schemas.proposta import PropostaResponse, ObservacoesPropostaResponse, LimitesPropostaResponse, PropostaResponseBase
 from typing import List, Any
+from copy import deepcopy
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 
@@ -93,8 +94,10 @@ def read_propostas_contraparte(
                 tipo_analise= contraparte.tipo_analise,
                 status= contraparte.status,
                 valor_utilizado_conversao= contraparte.valor_utilizado_conversao,
-                LimitesProposta= cap_limites_proposta(contraparte.id),
-                observacoes_proposta= cap_observacoes_proposta(contraparte.id),
+                active = contraparte.active,
+                data_criacao = contraparte.data_criacao,
+                LimitesProposta= cap_limites_proposta(contraparte.id_contraparte),
+                observacoes_proposta= cap_observacoes_proposta(contraparte.id_contraparte),
             )
             for contraparte in propostas_contraparte_query
 
@@ -109,24 +112,7 @@ def read_propostas_contraparte(
     return res
 
 
-@router.put("/{id_proposta}/alterar-status", response_model=PropostaContraparte)
-def update_propostas_contraparte_status(
-        id_proposta: int,
-        params: PropostaContraparteUpdateStatus,
-        db: Session = Depends(deps.get_db),
-) -> Any:
-    """
-    Update the status of PropostaContraparte by id_proposta.
-    """
-    propostas_contraparte_in_db = crud_propostas_contraparte.get_unic_propostas_contraparte(db, id_proposta)
-    if propostas_contraparte_in_db is None:
-        raise HTTPException(status_code=404, detail="PropostaContraparte not found")
 
-    propostas_contraparte_in_db.status = params.status
-    db.commit()
-    db.refresh(propostas_contraparte_in_db)
-    propostas_contraparte_in_db_dict = jsonable_encoder(propostas_contraparte_in_db)
-    return propostas_contraparte_in_db_dict
 
 
 
@@ -135,61 +121,151 @@ def create_propostas_contraparte(
     *,
     db: Session = Depends(deps.get_db),
     propostas_contraparte: PropostaContraparteCreate,
-    id_cliente: int,
-    id_contraparte: int,
 ) -> Any:
     """
     Create PropostaContraparte.
     """
-    cliente = crud_cliente.get_cliente(db, id_cliente)
+    cliente = crud_cliente.get_cliente(db, propostas_contraparte.id_cliente)
     if cliente is None:
         raise HTTPException(status_code=404, detail="Cliente not found")
 
     created_propostas_contraparte = crud_propostas_contraparte.create_propostas_contraparte(
         db=db,
         propostas_contraparte=propostas_contraparte,
-        id_cliente=id_cliente,
-        id_contraparte=id_contraparte,
     )
     created_propostas_contraparte_dict = jsonable_encoder(created_propostas_contraparte)
     return created_propostas_contraparte_dict
 
 
-@router.put("/{id_proposta}", response_model=PropostaContraparte)
-def update_propostas_contraparte(
-        id_proposta: int,
-        *,
-        db: Session = Depends(deps.get_db),
-        params: PropostaContraparteUpdate,
+@router.post("/{id_proposta}", response_model=PropostaContraparte)
+def create_propostas_contraparte(
+    id_proposta: int,
+    *,
+    db: Session = Depends(deps.get_db),
+    propostas_contraparte: PropostaContraparteCreate,
 ) -> Any:
     """
-    Update PropostaContraparte by id_proposta.
+    Create PropostaContraparte.
     """
-    params_dict = dict(params)
+    cliente = crud_cliente.get_cliente(db, propostas_contraparte.id_cliente)
+    if cliente is None:
+        raise HTTPException(status_code=404, detail="Cliente not found")
+    
     propostas_contraparte_in_db = crud_propostas_contraparte.get_unic_propostas_contraparte(db, id_proposta)
-    if propostas_contraparte_in_db is None:
-        raise HTTPException(status_code=404, detail="PropostaContraparte  not found")
+    if propostas_contraparte_in_db:
+        propostas_contraparte_in_db.active = False
+        db.commit()
+        db.refresh(propostas_contraparte_in_db)
 
-
-    propostas_contraparte_updated = crud_propostas_contraparte.update_propostas_contraparte(
-        db, db_obj=propostas_contraparte_in_db, obj_in=params_dict
+    created_propostas_contraparte = crud_propostas_contraparte.create_propostas_contraparte(
+        db=db,
+        propostas_contraparte=propostas_contraparte
     )
-    propostas_contraparte_updated_dict = jsonable_encoder(propostas_contraparte_updated)
-    return propostas_contraparte_updated_dict
+    created_propostas_contraparte_dict = jsonable_encoder(created_propostas_contraparte)
+    return created_propostas_contraparte_dict
 
 
-@router.delete("/{id_proposta}", response_model=dict)
-def delete_propostas_contraparte(
-        id_proposta: int,
-        db: Session = Depends(deps.get_db),
+@router.post("/{id_proposta}/alterar-status", response_model=PropostaContraparte)
+def create_propostas_contraparte_status(
+    id_proposta: int,
+    *,
+    db: Session = Depends(deps.get_db),
+    params: PropostaContraparteUpdateStatus,
 ) -> Any:
     """
-    Delete PropostaContraparte by id_aprovador.
+    Create PropostaContraparte.
     """
-    get_propostas_contraparte_in_db = crud_propostas_contraparte.get_aprovadores_cliente(db, id_proposta)
-    if get_propostas_contraparte_in_db is None:
-        raise HTTPException(status_code=404, detail="PropostaContraparte not found")
+    
+    propostas_contraparte_in_db = crud_propostas_contraparte.get_unic_propostas_contraparte(db, id_proposta)
+    if propostas_contraparte_in_db:
+        # Cria uma cópia do objeto com a alteração no status
+        propostas_contraparte_copia = deepcopy(propostas_contraparte_in_db)
+        
+        create = PropostaContraparteCreate(            
+            id_cliente = propostas_contraparte_copia.id_cliente,
+            id_contraparte = propostas_contraparte_copia.id_contraparte,
+            data_aprovacao_limite= propostas_contraparte_copia.data_aprovacao_limite,
+            grupo= propostas_contraparte_copia.grupo,
+            tipo_limite = propostas_contraparte_copia.tipo_limite,
+            data_proposta = propostas_contraparte_copia.data_proposta,
+            tipo_analise = propostas_contraparte_copia.tipo_analise,
+            status = params.status,
+            valor_utilizado_conversao = propostas_contraparte_copia.valor_utilizado_conversao,
+            active = True,
+            data_criacao = datetime.now(),            
+        )
+        # Desativa o objeto original
+        propostas_contraparte_in_db.active = False
+        db.commit()
+        db.refresh(propostas_contraparte_in_db)
+        
+        print(propostas_contraparte_copia)
+        # Cria o novo objeto com a cópia
+        created_propostas_contraparte = crud_propostas_contraparte.create_propostas_contraparte(
+            db=db,
+            propostas_contraparte=create
+        )
 
-    crud_propostas_contraparte.delete_aprovadores_cliente(db, get_propostas_contraparte_in_db)
+        created_propostas_contraparte_dict = jsonable_encoder(created_propostas_contraparte)
+        return created_propostas_contraparte_dict
 
-    return {"message": "PropostaContraparte deleted successfully"}
+
+# @router.put("/{id_proposta}/alterar-status", response_model=PropostaContraparte)
+# def update_propostas_contraparte_status(
+#         id_proposta: int,
+#         params: PropostaContraparteUpdateStatus,
+#         db: Session = Depends(deps.get_db),
+# ) -> Any:
+#     """
+#     Update the status of PropostaContraparte by id_proposta.
+#     """
+#     propostas_contraparte_in_db = crud_propostas_contraparte.get_unic_propostas_contraparte(db, id_proposta)
+#     if propostas_contraparte_in_db is None:
+#         raise HTTPException(status_code=404, detail="PropostaContraparte not found")
+
+#     propostas_contraparte_in_db.status = params.status
+#     db.commit()
+#     db.refresh(propostas_contraparte_in_db)
+#     propostas_contraparte_in_db_dict = jsonable_encoder(propostas_contraparte_in_db)
+#     return propostas_contraparte_in_db_dict
+
+
+
+# @router.put("/{id_proposta}", response_model=PropostaContraparte)
+# def update_propostas_contraparte(
+#         id_proposta: int,
+#         *,
+#         db: Session = Depends(deps.get_db),
+#         params: PropostaContraparteUpdate,
+# ) -> Any:
+#     """
+#     Update PropostaContraparte by id_proposta.
+#     """
+#     params_dict = dict(params)
+#     propostas_contraparte_in_db = crud_propostas_contraparte.get_unic_propostas_contraparte(db, id_proposta)
+#     if propostas_contraparte_in_db is None:
+#         raise HTTPException(status_code=404, detail="PropostaContraparte  not found")
+
+
+#     propostas_contraparte_updated = crud_propostas_contraparte.update_propostas_contraparte(
+#         db, db_obj=propostas_contraparte_in_db, obj_in=params_dict
+#     )
+#     propostas_contraparte_updated_dict = jsonable_encoder(propostas_contraparte_updated)
+#     return propostas_contraparte_updated_dict
+
+
+# @router.delete("/{id_proposta}", response_model=dict)
+# def delete_propostas_contraparte(
+#         id_proposta: int,
+#         db: Session = Depends(deps.get_db),
+# ) -> Any:
+#     """
+#     Delete PropostaContraparte by id_aprovador.
+#     """
+#     get_propostas_contraparte_in_db = crud_propostas_contraparte.get_aprovadores_cliente(db, id_proposta)
+#     if get_propostas_contraparte_in_db is None:
+#         raise HTTPException(status_code=404, detail="PropostaContraparte not found")
+
+#     crud_propostas_contraparte.delete_aprovadores_cliente(db, get_propostas_contraparte_in_db)
+
+#     return {"message": "PropostaContraparte deleted successfully"}

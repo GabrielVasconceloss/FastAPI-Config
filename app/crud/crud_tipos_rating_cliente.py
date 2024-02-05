@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.db.models.tipos_rating_cliente import TiposRatingCliente
 from app.schemas.tipos_rating_cliente import TiposRatingClienteCreate
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import asc
 
 def create_tipos_rating_cliente(db: Session, tipos_rating_cliente_in: TiposRatingClienteCreate):
     db_tipos_rating_cliente = TiposRatingCliente(**tipos_rating_cliente_in.dict())
@@ -22,10 +23,15 @@ def get_multi_tipos_rating_cliente(db: Session, skip: int = 0, limit: int = 10):
 
 
 def get_all_tipos_rating_cliente(db: Session, id_cliente: int):
-    aprovadores_cliente = db.query(TiposRatingCliente).filter(TiposRatingCliente.id_cliente == id_cliente, TiposRatingCliente.active == True).all()
-    if not aprovadores_cliente:
+    tipos_rating_cliente = (
+        db.query(TiposRatingCliente)
+        .filter(TiposRatingCliente.id_cliente == id_cliente, TiposRatingCliente.active == True)
+        .order_by(asc(TiposRatingCliente.codigo_rating))
+        .all()
+    )
+    if not tipos_rating_cliente:
         return None
-    return aprovadores_cliente
+    return tipos_rating_cliente
 
 
 def get_unic_tipos_rating_cliente(db: Session, id_tipo_rating: int):

@@ -15,6 +15,8 @@ class ObservacoesPropostaBase(BaseModel):
 
 
 class ObservacoesPropostaCreate(BaseModel):
+    id_cliente: int
+    id_proposta: int
     id_contraparte: int
     tipo_observacao: int
     observacao_vigente: str
