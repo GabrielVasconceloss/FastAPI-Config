@@ -108,9 +108,6 @@ def create_configuracao_cliente(
     """
     Create ConfiguracaoCliente.
     """
-    cliente = crud_cliente.get_cliente(db, id=configuracao_cliente_in.id_cliente)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente not found")
 
     existing_configuracao = crud.get_configuracao_cliente_by_cliente_id(db, cliente_id=configuracao_cliente_in.id_cliente)
     if existing_configuracao:

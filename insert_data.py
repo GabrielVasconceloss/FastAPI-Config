@@ -10,7 +10,7 @@ def insert_data():
     POSTGRES_USER = "fast"
     POSTGRES_PASSWORD = "25673275"
     POSTGRES_DB = "fastapi"
-    POSTGRES_HOST = "fastapi-config-db-1"
+    POSTGRES_HOST = "fastapi-config_db_1"
     POSTGRES_PORT = "5432"
 
     # Crie a URL do banco de dados

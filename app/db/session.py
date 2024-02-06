@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 POSTGRES_USER = os.environ.get("POSTGRES_USER", "fast")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "25673275")
 POSTGRES_DB = os.environ.get("POSTGRES_DB", "fastapi")
-POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "fastapi-config-db-1")
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "fastapi-config_db_1")
 POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "5432")
 
 
