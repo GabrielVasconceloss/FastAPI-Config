@@ -1,0 +1,16 @@
+INFO:     Will watch for changes in these directories: ['/home/informaker/FastAPI-CRUD']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [125239] using StatReload
+/home/informaker/.local/lib/python3.10/site-packages/pydantic/_internal/_config.py:321: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+INFO:     Started server process [125241]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     192.168.113.6:63567 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.113.6:63567 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [125241]
+INFO:     Stopping reloader process [125239]
